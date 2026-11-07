@@ -14,7 +14,7 @@
 /coverage
 
 # next.js
-/.next/
+/.next
 /out/
 
 # production
@@ -43,3 +43,7 @@ next-env.d.ts
 # claude code
 CLAUDE.md
 .claude/
+
+# dossiers exclus de la synchro iCloud (node_modules et .next pointent dessus)
+*.nosync
+node_modules */

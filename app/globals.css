@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
+/* Variante `under:` : s'applique quand on est sous l'eau (data-under sur <html>). */
+@custom-variant under (html[data-under="true"] &);
+
+/* Les ancres ne passent pas sous l'en-tête fixe. */
+html {
+  scroll-padding-top: 6rem;
+}
+
+/*
+ * Palette « plongée » : on part du papier (encre sur blanc cassé),
+ * on finit sous l'eau (texte écume sur bleu abyssal).
+ * On change une couleur ici, elle change partout.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* Au-dessus de l'eau : la feuille de papier */
+  --paper: #fbfcfc;
+  --ink: #15191a;
+  --ink-muted: #4b5556;
+  --rule: #c9cfcf;
+  --signal: #2b50d6; /* traits d'annotation sur le spectrogramme */
+
+  /* Sous l'eau */
+  --abyss: #020b10;
+  --foam: #e7f3f0; /* texte principal */
+  --sea-text: #d4e8e4; /* paragraphes */
+  --sea-muted: #9ebfc0; /* texte secondaire */
+  --bio: #8fe9ff; /* accent bioluminescent : liens, sélection */
 }
 
+/*
+ * Expose les variables à Tailwind : `bg-paper`, `text-ink`,
+ * `text-sea-muted`, `text-bio`... deviennent utilisables en classes.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --color-signal: var(--signal);
+  --color-abyss: var(--abyss);
+  --color-foam: var(--foam);
+  --color-sea-text: var(--sea-text);
+  --color-sea-muted: var(--sea-muted);
+  --color-bio: var(--bio);
+
+  --font-serif: var(--font-charis);
+  --font-mono: var(--font-plex-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/*
+ * Panneaux : le texte est posé sur une « fenêtre » semi-opaque et floutée,
+ * comme un écran d'instrument par-dessus la mer. C'est ce qui garantit la
+ * lisibilité, quel que soit ce que la 3D affiche derrière.
+ */
+@utility panel-paper {
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  backdrop-filter: blur(6px);
+}
+@utility panel-sea {
+  background: color-mix(in srgb, var(--abyss) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foam) 18%, transparent);
+  backdrop-filter: blur(6px);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--abyss);
+  color: var(--foam);
+}
+
+::selection {
+  background: var(--bio);
+  color: var(--abyss);
+}
+
+/* --- Sonar ------------------------------------------------------------- */
+
+.sonar-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 70vmin;
+  height: 70vmin;
+  border-radius: 50%;
+  border: 2px solid var(--bio);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--bio) 50%, transparent);
+  transform: translate(-50%, -50%) scale(0);
+  animation: sonar-out 1.4s cubic-bezier(0.2, 0.6, 0.3, 1) forwards;
+}
+/* L'écho revenu du fond : plus fin, en pointillés, et il se resserre. */
+.sonar-echo {
+  width: 24vmin;
+  height: 24vmin;
+  border-width: 1px;
+  border-style: dashed;
+  animation: sonar-in 0.9s ease-in forwards;
+}
+.sonar-label {
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  /* Petite étiquette sombre : lisible au-dessus comme au-dessous de l'eau. */
+  background: var(--abyss);
+  color: var(--foam);
+  animation: sonar-fade 2.8s ease-out forwards;
+}
+@keyframes sonar-out {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+@keyframes sonar-in {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(0.05); opacity: 0.2; }
+}
+@keyframes sonar-fade {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* --- Rendu rétro « sonar » : la version de base du site -------------------- */
+
+/*
+ * Toute la palette passe aux 4 couleurs d'écran de sonar : comme chaque couleur
+ * du site vient de ces variables, il suffit de les redéfinir ici.
+ * Le Konami code retire `data-mode="retro"` et on retrouve la version HD.
+ */
+html[data-mode="retro"] {
+  /* LA palette rétro, du plus sombre au plus clair. La scène 3D et le filtre
+     des images la lisent aussi : on ne la change qu'ici.
+     Les tons 0-1 (sous l'eau) et 2-3 (au-dessus) sont proches : le tramage
+     reste discret derrière le texte, qui prend toujours une couleur extrême. */
+  --retro-0: #071a1f; /* fond d'écran sonar */
+  --retro-1: #12343c;
+  --retro-2: #8cc9b5;
+  --retro-3: #d2efe3; /* phosphore pâle */
+
+  /* Le « papier » (ciel, panneaux clairs) n'est pas le ton le plus clair :
+     un quart de --retro-2 en plus, pour ne pas éblouir. */
+  --paper: color-mix(in srgb, var(--retro-3) 75%, var(--retro-2));
+  --ink: var(--retro-0);
+  --ink-muted: var(--retro-1);
+  --rule: var(--retro-1);
+  --signal: var(--retro-0);
+  --abyss: var(--retro-0);
+  --foam: var(--retro-3);
+  --sea-text: var(--retro-3);
+  --sea-muted: var(--retro-2);
+  --bio: var(--retro-3);
+
+  /* Tout le texte en mono : lisible, esprit terminal et instrument de mesure. */
+  --font-charis: var(--font-plex-mono);
+}
+/* Les titres : Space Grotesk, serrée. */
+html[data-mode="retro"] :is(h1, h2, h3) {
+  font-family: var(--font-title);
+  letter-spacing: -0.03em;
+}
+html[data-mode="retro"] img {
+  image-rendering: pixelated;
+  filter: url(#retro); /* filtre SVG défini dans <Konami /> */
+}
+/* Spectrogramme imprimé en noir sur blanc : on l'inverse (clair sur sombre). */
+/* Le logo (spectrogramme noir sur blanc) : inversé quand l'en-tête est sombre. */
+html[data-under="true"] .spectro-logo {
+  filter: invert(1) grayscale(1);
+}
+html[data-mode="retro"][data-under="true"] img.spectro-logo {
+  filter: invert(1) url(#retro);
+}
+/* Les ondes du sonar avancent par à-coups, comme sur un vieil écran. */
+html[data-mode="retro"] .sonar-ring {
+  border-radius: 0;
+  border-style: solid;
+  animation-timing-function: steps(6);
+}
+html[data-mode="retro"] .sonar-echo {
+  animation-timing-function: steps(4);
 }

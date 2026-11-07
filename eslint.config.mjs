@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vrais dossiers derrière les liens .next / node_modules (astuce iCloud)
+    "*.nosync/**",
+    // Doublons créés par iCloud (« node_modules 2 »...)
+    "node_modules */**",
   ]),
 ]);
 

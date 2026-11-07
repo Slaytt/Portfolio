@@ -1,69 +1,120 @@
 import Image from "next/image";
+import Header from "@/components/Header";
+import DepthGauge from "@/components/plongee/DepthGauge";
+import Konami from "@/components/plongee/Konami";
+import Ocean from "@/components/plongee/Ocean";
+import Sonar from "@/components/plongee/Sonar";
+
+// Les quatre passions, chacune avec « son » spectrogramme.
+const passions = [
+  {
+    titre: "Clics de dauphin",
+    detail: "Bioacoustique : détecteur NBHF, OceanKit, Hublot",
+    image: "/spectrogrammes/dauphin.png",
+  },
+  {
+    titre: "Voyelles",
+    detail: "Linguistique et TAL : biais de genre, Circuit Atlas",
+    image: "/spectrogrammes/voyelles.png",
+  },
+  {
+    titre: "Onde carrée 8 bits",
+    detail: "Jeux vidéo et machines rétro",
+    image: "/spectrogrammes/8bits.png",
+  },
+  {
+    titre: "Vent et oiseaux",
+    detail: "Voyage et plongée, Amérique du Sud",
+    image: "/spectrogrammes/vent-oiseaux.png",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="relative">
+      <Ocean />
+      <Header />
+      <DepthGauge />
+      <Sonar />
+      <Konami />
+
+      {/* Au-dessus de l'eau : le nom et une phrase */}
+      <section className="relative flex min-h-svh flex-col justify-end px-6 py-14 text-ink md:pr-18 md:pl-60">
+        <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-14">
+          <h1 className="m-0 text-[clamp(96px,12vw,176px)] leading-[0.85] font-bold">
+            Téo
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <div className="panel-paper flex flex-col gap-3.5 px-6 py-5">
+            <p className="m-0 text-xl leading-[1.55]">
+              Maths, informatique et langage. J’écoute des dauphins, des
+              voyelles et des vieilles consoles.
+            </p>
+            <p className="m-0 font-mono text-sm font-medium text-ink-muted">
+              Faites défiler pour plonger ↓
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* La traversée de la surface : de l'espace vide pour laisser la caméra descendre */}
+      <div aria-hidden="true" className="h-[128vh]" />
+
+      {/* Sous la surface */}
+      <section id="passions" className="flex min-h-[111vh] flex-col gap-7 px-6 text-foam md:pr-18 md:pl-60">
+        <div className="panel-sea flex max-w-[44rem] flex-col gap-5 px-7 py-6">
+          <span className="font-mono text-sm text-sea-muted">
+            sous la surface
+          </span>
+          <h2 className="m-0 max-w-[12ch] text-[clamp(52px,6vw,80px)] leading-[0.95] font-bold">
+            Tout ce que j’écoute
+          </h2>
+          <p className="m-0 max-w-[46ch] text-xl leading-[1.55] text-sea-text">
+            Chaque passion a un son, et chaque son a un spectrogramme. Sous
+            l’eau, ils reprennent leurs couleurs.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+        <ul className="mt-6 grid list-none grid-cols-1 gap-7 p-0 sm:grid-cols-2 lg:grid-cols-4">
+          {passions.map((passion) => (
+            <li
+              key={passion.titre}
+              className="panel-sea flex flex-col gap-2.5 p-3 pb-4"
+            >
+              <Image
+                src={passion.image}
+                alt=""
+                width={960}
+                height={400}
+                className="h-[130px] w-full rounded-[2px] object-cover shadow-[0_0_0_1px_rgba(143,233,255,0.25)]"
+              />
+              <h3 className="m-0 px-1 pt-1 text-[21px] font-bold">
+                {passion.titre}
+              </h3>
+              <span className="px-1 text-base leading-[1.45] text-sea-text">
+                {passion.detail}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Contact, tout au fond */}
+      <section id="contact" className="flex min-h-svh flex-col items-start px-6 pt-40 text-foam md:pr-18 md:pl-60">
+        <div className="panel-sea flex flex-col gap-5.5 px-7 py-6">
+          <h2 className="m-0 text-[clamp(52px,6vw,80px)] leading-[0.95] font-bold">
+            Me contacter
+          </h2>
+          <p className="m-0 max-w-[44ch] text-xl leading-[1.55] text-sea-text">
+            Un stage, une collaboration, un enregistrement à partager.
+          </p>
+          {/* TODO : mettre la vraie adresse */}
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="mailto:"
+            className="mt-3 self-start text-xl text-bio underline underline-offset-4 transition-colors hover:text-foam"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
+            [TON ADRESSE]
           </a>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
