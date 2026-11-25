@@ -20,7 +20,7 @@ const plexMono = IBM_Plex_Mono({
 // Titres de la version rétro : une grotesque géométrique, techno années 70.
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-title",
-  weight: ["500", "700"],
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
 });
 
