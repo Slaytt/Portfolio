@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Charis_SIL, IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
-import "./globals.css";
+import { getDictionary, getLocale } from "@/lib/dictionary";
+import { locales } from "@/lib/i18n";
+import "../globals.css";
 
 // Texte : une serif de linguiste (Charis SIL est faite pour l'API phonétique).
 const charis = Charis_SIL({
@@ -24,18 +26,32 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Teo Ranzi",
-    template: "%s · Teo Ranzi",
-  },
-  description: "Portfolio : projets, CV et logiciels.",
-};
+// Les trois versions (/fr, /en, /es) sont générées au build.
+export function generateStaticParams() {
+  return locales.map((lang) => ({ lang }));
+}
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export async function generateMetadata(): Promise<Metadata> {
+  const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
+  return {
+    metadataBase: new URL("https://teoranzi.dev"),
+    title: {
+      default: "Teo Ranzi",
+      template: "%s · Teo Ranzi",
+    },
+    description: dict.meta.description,
+    // Indique aux moteurs de recherche les autres langues de la même page.
+    alternates: {
+      canonical: `/${locale}`,
+      languages: Object.fromEntries(locales.map((l) => [l, `/${l}`])),
+    },
+  };
+}
+
+export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
   return (
     <html
-      lang="fr"
+      lang={await getLocale()}
       data-mode="retro" // version rétro par défaut ; le Konami code passe en HD
       className={`${charis.variable} ${plexMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >

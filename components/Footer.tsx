@@ -4,19 +4,22 @@
  * pour remonter (le lien "#" ramène en haut, donc à la surface).
  */
 
+import { getDictionary, getLocale } from "@/lib/dictionary";
+
 const annee = 2026;
 
-const liens = [
-  { href: "https://github.com/Slaytt", label: "GitHub ↗", externe: true },
-  {
-    href: "https://scholar.google.com/citations?user=6-_Jk4sAAAAJ&hl=fr",
-    label: "Scholar ↗",
-    externe: true,
-  },
-  { href: "mailto:teo.ranzi@etu.univ-amu.fr", label: "Mail", externe: false },
-];
+export default async function Footer() {
+  const [dict, locale] = await Promise.all([getDictionary(), getLocale()]);
+  const liens = [
+    { href: "https://github.com/Slaytt", label: "GitHub ↗", externe: true },
+    {
+      href: `https://scholar.google.com/citations?user=6-_Jk4sAAAAJ&hl=${locale}`,
+      label: "Scholar ↗",
+      externe: true,
+    },
+    { href: "mailto:teo.ranzi@etu.univ-amu.fr", label: dict.footer.mail, externe: false },
+  ];
 
-export default function Footer() {
   return (
     <footer
       data-no-sonar // un clic ici n'envoie pas de ping
@@ -38,7 +41,7 @@ export default function Footer() {
           ))}
           <li>
             <a href="#" className="underline-offset-4 hover:underline">
-              Remonter à la surface ↑
+              {dict.footer.top}
             </a>
           </li>
         </ul>

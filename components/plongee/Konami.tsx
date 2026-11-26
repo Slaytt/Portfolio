@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Dictionary } from "@/dictionaries/fr";
 import { retroMode, retroRamp } from "./retro";
 
 // ↑ ↑ ↓ ↓ ← → ← → B A
@@ -21,8 +22,9 @@ const CODE = [
  * Le Konami code bascule entre la version rétro (par défaut) et la version HD.
  * Ce composant porte aussi le filtre SVG qui passe les images à la palette rétro.
  */
-export default function Konami() {
-  const [toast, setToast] = useState<string | null>(null);
+export default function Konami({ text }: { text: Dictionary["konami"] }) {
+  // Le message affiché : retour au rétro, passage en HD, ou rien.
+  const [toast, setToast] = useState<"retro" | "hd" | null>(null);
   const funcs = useRef<(SVGFEFuncRElement | SVGFEFuncGElement | SVGFEFuncBElement | null)[]>([]);
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function Konami() {
       const retro = !retroMode.get();
       retroMode.set(retro);
       if (retro) syncFilter();
-      setToast(retro ? "RETOUR AU SONAR" : "MODE HD");
+      setToast(retro ? "retro" : "hd");
       clearTimeout(hide);
       hide = setTimeout(() => setToast(null), 2500);
     };
@@ -86,9 +88,9 @@ export default function Konami() {
       >
         {toast && (
           <p className="m-0 border-2 border-current bg-paper px-4 py-3 font-mono text-sm text-ink">
-            {toast}
-            {toast === "MODE HD" && (
-              <span className="block pt-2 text-[10px] opacity-70">↑↑↓↓←→←→BA pour revenir</span>
+            {text[toast]}
+            {toast === "hd" && (
+              <span className="block pt-2 text-[10px] opacity-70">{text.hdHint}</span>
             )}
           </p>
         )}

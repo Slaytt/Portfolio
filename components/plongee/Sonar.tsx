@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { Dictionary } from "@/dictionaries/fr";
+import { formatNumber, type Locale } from "@/lib/i18n";
 import { SEAFLOOR, SOUND_SPEED_WATER, depthMeters, readScroll } from "./dive";
 
 /*
@@ -14,12 +16,12 @@ export type SonarEcho = { rtt: number; distance: number };
 
 type Wave = { id: number; x: number; y: number; kind: "out" | "echo"; label?: string };
 
-const fr = (x: number, digits: number) => x.toFixed(digits).replace(".", ",");
-
 // Les clics sur ces éléments gardent leur rôle normal : pas de ping.
 const INTERACTIVE = "a, button, input, textarea, select, label, summary, [data-no-sonar]";
 
-export default function Sonar() {
+type Props = { locale: Locale; text: Dictionary["sonar"] };
+
+export default function Sonar({ locale, text }: Props) {
   const [waves, setWaves] = useState<Wave[]>([]);
 
   useEffect(() => {
@@ -41,7 +43,9 @@ export default function Sonar() {
       // L'écho revient après le vrai temps d'aller-retour.
       const timer = setTimeout(() => {
         timers.delete(timer);
-        const label = `écho ${fr(rtt, 2)} s → fond à ${Math.round(distance)} m`;
+        const label = text.echo
+          .replace("{rtt}", formatNumber(locale, rtt, 2))
+          .replace("{distance}", String(Math.round(distance)));
         setWaves((w) => [...w, { id: nextId++, x, y, kind: "echo", label }]);
         window.dispatchEvent(new CustomEvent<SonarEcho>("sonar", { detail: { rtt, distance } }));
       }, rtt * 1000);
@@ -53,7 +57,7 @@ export default function Sonar() {
       window.removeEventListener("click", onClick);
       timers.forEach(clearTimeout);
     };
-  }, []);
+  }, [locale, text]);
 
   const remove = (id: number) => setWaves((w) => w.filter((wave) => wave.id !== id));
 

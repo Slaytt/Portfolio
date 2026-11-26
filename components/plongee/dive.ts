@@ -76,9 +76,10 @@ export const temperatureC = (d: number) => 4 + 13 / (1 + Math.exp((d - 110) / 45
 /** Lumière restante, en % de la surface (eau claire du large). */
 export const lightPercent = (d: number) => 100 * Math.exp(-d / 45);
 
+/** Zone océanique selon la profondeur (la jauge traduit la clé). */
 export function zoneName(d: number) {
   if (d <= 0) return "surface";
-  if (d < 200) return "épipélagique";
-  if (d < 1000) return "mésopélagique";
-  return "bathypélagique";
+  if (d < 200) return "epipelagic";
+  if (d < 1000) return "mesopelagic";
+  return "bathypelagic";
 }

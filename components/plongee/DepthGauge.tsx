@@ -11,6 +11,8 @@ import {
   temperatureC,
   zoneName,
 } from "./dive";
+import type { Dictionary } from "@/dictionaries/fr";
+import { formatNumber, type Locale } from "@/lib/i18n";
 import type { SonarEcho } from "./Sonar";
 
 /*
@@ -26,10 +28,17 @@ import type { SonarEcho } from "./Sonar";
 
 const PX_PER_M = 1.6; // échelle de la règle
 
-const fr = (x: number, digits = 1) => x.toFixed(digits).replace(".", ",");
-
-const formatLight = (pct: number) =>
-  pct >= 10 ? `${Math.round(pct)} %` : pct >= 0.01 ? `${fr(pct, 2)} %` : "≈ 0 %";
+/** Pourcentage à la façon de la langue (« 12 % » en français, « 12% » en anglais). */
+const formatLight = (locale: Locale, pct: number) => {
+  const digits = pct >= 10 ? 0 : 2;
+  const percent = (x: number) =>
+    x.toLocaleString(locale, {
+      style: "percent",
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    });
+  return pct >= 0.01 ? percent(pct / 100) : `≈ ${percent(0)}`;
+};
 
 function Tape() {
   const ticks = [];
@@ -63,7 +72,10 @@ function Tape() {
   );
 }
 
-export default function DepthGauge() {
+type Props = { locale: Locale; text: Dictionary["gauge"] };
+
+export default function DepthGauge({ locale, text }: Props) {
+  const num = (x: number, digits = 1) => formatNumber(locale, x, digits);
   const rootRef = useRef<HTMLElement>(null);
   const depthRef = useRef<HTMLSpanElement>(null);
   const tapeRef = useRef<HTMLDivElement>(null);
@@ -87,7 +99,7 @@ export default function DepthGauge() {
     // Dernier écho du sonar, envoyé par <Sonar /> sous forme d'événement.
     const onEcho = (e: Event) => {
       const { rtt } = (e as CustomEvent<SonarEcho>).detail;
-      set("echo", echoRef.current, `${fr(rtt, 2)} s`);
+      set("echo", echoRef.current, `${num(rtt, 2)} s`);
       echoRef.current?.classList.remove("opacity-70");
     };
     window.addEventListener("sonar", onEcho);
@@ -103,11 +115,11 @@ export default function DepthGauge() {
       if (rootRef.current) rootRef.current.dataset.under = String(under);
       // Aussi sur <html> : l'en-tête (et tout le CSS) peut réagir avec `under:`.
       document.documentElement.dataset.under = String(under);
-      set("depth", depthRef.current, under ? `−${Math.max(1, Math.round(d))} m` : "surface");
-      set("pressure", pressureRef.current, `${fr(pressureBar(d))} bar`);
-      set("temp", tempRef.current, `${fr(temperatureC(d))} °C`);
-      set("light", lightRef.current, formatLight(lightPercent(d)));
-      set("zone", zoneRef.current, zoneName(under ? Math.max(d, 1) : 0));
+      set("depth", depthRef.current, under ? `−${Math.max(1, Math.round(d))} m` : text.surface);
+      set("pressure", pressureRef.current, `${num(pressureBar(d))} bar`);
+      set("temp", tempRef.current, `${num(temperatureC(d))} °C`);
+      set("light", lightRef.current, formatLight(locale, lightPercent(d)));
+      set("zone", zoneRef.current, text.zones[zoneName(under ? Math.max(d, 1) : 0)]);
       if (tapeRef.current) tapeRef.current.style.transform = `translateY(${-d * PX_PER_M}px)`;
 
 
@@ -118,6 +130,8 @@ export default function DepthGauge() {
       cancelAnimationFrame(raf);
       window.removeEventListener("sonar", onEcho);
     };
+    // `num` et `text` ne changent qu'avec la langue, qui recharge la page.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const row = "flex justify-between gap-3 whitespace-nowrap";
@@ -135,9 +149,9 @@ export default function DepthGauge() {
     >
       {/* Profondeur */}
       <div className={`${panel} flex flex-col gap-1 px-3 py-2.5`}>
-        <span className={label}>prof.</span>
+        <span className={label}>{text.depth}</span>
         <span ref={depthRef} className="text-lg leading-none font-medium">
-          surface
+          {text.surface}
         </span>
       </div>
 
@@ -155,24 +169,24 @@ export default function DepthGauge() {
       {/* Mesures */}
       <dl className={`${panel} m-0 hidden flex-col gap-1.5 px-3 py-2.5 md:flex`}>
         <div className={row}>
-          <dt className={label}>pression</dt>
-          <dd ref={pressureRef} className="m-0">1,0 bar</dd>
+          <dt className={label}>{text.pressure}</dt>
+          <dd ref={pressureRef} className="m-0">{num(1)} bar</dd>
         </div>
         <div className={row}>
-          <dt className={label}>temp.</dt>
-          <dd ref={tempRef} className="m-0">17,0 °C</dd>
+          <dt className={label}>{text.temperature}</dt>
+          <dd ref={tempRef} className="m-0">{num(17)} °C</dd>
         </div>
         <div className={row}>
-          <dt className={label}>lumière</dt>
-          <dd ref={lightRef} className="m-0">100 %</dd>
+          <dt className={label}>{text.light}</dt>
+          <dd ref={lightRef} className="m-0">{formatLight(locale, 100)}</dd>
         </div>
         <div className={row}>
-          <dt className={label}>zone</dt>
-          <dd ref={zoneRef} className="m-0">surface</dd>
+          <dt className={label}>{text.zone}</dt>
+          <dd ref={zoneRef} className="m-0">{text.zones.surface}</dd>
         </div>
         <div className={row}>
-          <dt className={label}>écho</dt>
-          <dd ref={echoRef} className="m-0 opacity-70">clic ↯</dd>
+          <dt className={label}>{text.echo}</dt>
+          <dd ref={echoRef} className="m-0 opacity-70">{text.clickHint}</dd>
         </div>
       </dl>
     </aside>
